@@ -60,3 +60,20 @@ async def search_task(name: str):
         "due_date": task.get("due_date"),
         "assignee": task["assignees"][0]["username"] if task["assignees"] else "Unassigned"
     }
+
+@app.get("/debug/team-space")
+async def debug_team_space():
+    async with httpx.AsyncClient() as client:
+        res = await client.get(f"{CLICKUP_BASE_URL}/team", headers=HEADERS)
+        team_data = res.json()
+
+        team_id = team_data.get("teams", [{}])[0].get("id", "No team ID")
+        print("Team ID:", team_id)
+
+        res_spaces = await client.get(f"{CLICKUP_BASE_URL}/team/{team_id}/space", headers=HEADERS)
+        space_data = res_spaces.json()
+
+        return {
+            "team_data": team_data,
+            "space_data": space_data
+        }
