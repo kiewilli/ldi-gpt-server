@@ -69,3 +69,29 @@ async def debug_team_space():
             "team_data": team_data,
             "space_data": space_data
         }
+
+@app.get("/debug/lists")
+async def debug_lists():
+    async with httpx.AsyncClient() as client:
+        # Get all spaces for your team
+        res = await client.get(f"{CLICKUP_BASE_URL}/team/24555507/space", headers=HEADERS)
+        spaces = res.json().get("spaces", [])
+
+        all_lists = []
+
+        for space in spaces:
+            space_id = space["id"]
+            # Get folders in this space
+            folder_res = await client.get(f"{CLICKUP_BASE_URL}/space/{space_id}/folder", headers=HEADERS)
+            folders = folder_res.json().get("folders", [])
+
+            for folder in folders:
+                for lst in folder.get("lists", []):
+                    all_lists.append({
+                        "space_name": space["name"],
+                        "folder_name": folder["name"],
+                        "list_name": lst["name"],
+                        "list_id": lst["id"]
+                    })
+
+        return {"lists": all_lists}
