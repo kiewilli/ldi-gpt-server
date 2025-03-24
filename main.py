@@ -109,3 +109,10 @@ async def debug_lists():
                 })
 
         return {"lists": all_lists}
+
+@app.get("/debug/task")
+async def debug_task():
+    task_id = "2razngv"  # Known task ID
+    async with httpx.AsyncClient() as client:
+        res = await client.get(f"{CLICKUP_BASE_URL}/task/{task_id}", headers=HEADERS)
+        return res.json()
