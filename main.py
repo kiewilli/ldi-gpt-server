@@ -32,19 +32,10 @@ async def get_course_status(task_id: str):
 
 @app.get("/search-task")
 async def search_task(name: str):
+    LIST_ID = "6-381118276-1"
+
     async with httpx.AsyncClient() as client:
-        res = await client.get(f"{CLICKUP_BASE_URL}/team", headers=HEADERS)
-        team_id = res.json()["teams"][0]["id"]
-
-        # Get all spaces (or scope this tighter to your needs)
-        res = await client.get(f"{CLICKUP_BASE_URL}/team/{team_id}/space", headers=HEADERS)
-        spaces = res.json().get("spaces", [])
-        if not spaces:
-            return {"error": "No spaces found."}
-
-        # Search within the first space
-        space_id = spaces[0]["id"]
-        res = await client.get(f"{CLICKUP_BASE_URL}/space/{space_id}/task", headers=HEADERS)
+        res = await client.get(f"{CLICKUP_BASE_URL}/list/{LIST_ID}/task", headers=HEADERS)
         tasks = res.json().get("tasks", [])
 
     # Simple case-insensitive search
@@ -60,6 +51,7 @@ async def search_task(name: str):
         "due_date": task.get("due_date"),
         "assignee": task["assignees"][0]["username"] if task["assignees"] else "Unassigned"
     }
+
 
 @app.get("/debug/team-space")
 async def debug_team_space():
