@@ -32,7 +32,7 @@ async def get_course_status(task_id: str):
 
 @app.get("/search-task")
 async def search_task(name: str):
-    LIST_ID = "6-381118276-1"
+    LIST_ID = "381118276"
 
     async with httpx.AsyncClient() as client:
         res = await client.get(f"{CLICKUP_BASE_URL}/list/{LIST_ID}/task", headers=HEADERS)
