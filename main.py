@@ -24,6 +24,6 @@ async def get_course_status(task_id: str):
     return {
         "task_name": data["name"],
         "status": data["status"]["status"],
-        "due_date": data.get("due_date"),
+"due_date": datetime.utcfromtimestamp(int(data.get("due_date", 0)) / 1000).strftime('%Y-%m-%d') if data.get("due_date") else "None",
         "assignee": data["assignees"][0]["username"] if data["assignees"] else "Unassigned"
     }
