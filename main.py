@@ -36,20 +36,23 @@ async def search_task(name: str):
         res = await client.get(f"{CLICKUP_BASE_URL}/team", headers=HEADERS)
         team_id = res.json()["teams"][0]["id"]
 
-        res = await client.get(
-            f"{CLICKUP_BASE_URL}/team/{team_id}/task",
-            headers=HEADERS,
-            params={"name": name}
-        )
+        # Get all spaces (or scope this tighter to your needs)
+        res = await client.get(f"{CLICKUP_BASE_URL}/team/{team_id}/space", headers=HEADERS)
+        spaces = res.json().get("spaces", [])
+        if not spaces:
+            return {"error": "No spaces found."}
 
-    if res.status_code != 200:
-        return {"error": "Unable to search tasks."}
+        # Search within the first space
+        space_id = spaces[0]["id"]
+        res = await client.get(f"{CLICKUP_BASE_URL}/space/{space_id}/task", headers=HEADERS)
+        tasks = res.json().get("tasks", [])
 
-    tasks = res.json().get("tasks", [])
-    if not tasks:
-        return {"message": "No matching task found."}
+    # Simple case-insensitive search
+    matches = [t for t in tasks if name.lower() in t["name"].lower()]
+    if not matches:
+        return {"message": f"No task found containing '{name}'."}
 
-    task = tasks[0]  # Top match
+    task = matches[0]
     return {
         "task_id": task["id"],
         "task_name": task["name"],
